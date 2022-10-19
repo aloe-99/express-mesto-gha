@@ -35,7 +35,7 @@ module.exports.createCard = (req, res) => {
 };
 
 module.exports.likeCard = (req, res) => {
-  if (req.params.userId.match(/^[0-9a-fA-F]{24}$/)) {
+  if (req.params.cardId.match(/^[0-9a-fA-F]{24}$/)) {
     Card.findByIdAndUpdate(
       req.params.cardId,
       { $addToSet: { likes: req.user._id } },
@@ -60,7 +60,7 @@ module.exports.likeCard = (req, res) => {
 };
 
 module.exports.removeLike = (req, res) => {
-  if (req.params.userId.match(/^[0-9a-fA-F]{24}$/)) {
+  if (req.params.cardId.match(/^[0-9a-fA-F]{24}$/)) {
     Card.findByIdAndUpdate(
       req.params.cardId,
       { $pull: { likes: req.user._id } },
@@ -85,7 +85,7 @@ module.exports.removeLike = (req, res) => {
 };
 
 module.exports.deleteCard = (req, res) => {
-  if (req.params.userId.match(/^[0-9a-fA-F]{24}$/)) {
+  if (req.params.cardId.match(/^[0-9a-fA-F]{24}$/)) {
     Card.findByIdAndRemove(req.params.cardId)
       .then(cards => res.send({ data: cards }))
       .catch((err) => {
