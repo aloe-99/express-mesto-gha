@@ -53,8 +53,8 @@ module.exports.likeCard = (req, res) => {
         return;
       });
   } else {
-    return res.status(400).send({
-      "message": "Переданы некорректный идентификатор карточки"
+    return res.status(404).send({
+      "message": "Запрашиваемый объект не найден"
     });
   }
 };
@@ -78,8 +78,8 @@ module.exports.removeLike = (req, res) => {
         return;
       });
   } else {
-    return res.status(400).send({
-      "message": "Переданы некорректный идентификатор карточки"
+    return res.status(404).send({
+      "message": "Запрашиваемый объект не найден"
     });
   }
 };
@@ -99,8 +99,8 @@ module.exports.deleteCard = (req, res) => {
         return;
       });
   } else {
-    return res.status(400).send({
-      "message": "Переданы некорректный идентификатор карточки"
+    return res.status(404).send({
+      "message": "Запрашиваемый объект не найден"
     });
   }
 }

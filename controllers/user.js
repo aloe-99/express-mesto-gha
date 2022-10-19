@@ -44,6 +44,11 @@ module.exports.editUser = (req, res) => {
           "message": "Переданы некорректные данные"
         });
       }
+      if (err.name === 'AssertionError') {
+        return res.status(404).send({
+          "message": "Страница не найдена"
+        });
+      }
       res.status(500);
       console.log(`Произошла неизвестная ошибка ${err.name}: ${err.message}`);
       return;
@@ -57,6 +62,11 @@ module.exports.editUserAvatar = (req, res) => {
       if (err.name === 'ValidationError') {
         return res.status(400).send({
           "message": "Переданы некорректные данные"
+        });
+      }
+      if (err.name === 'AssertionError') {
+        return res.status(404).send({
+          "message": "Страница не найдена"
         });
       }
       res.status(500);
