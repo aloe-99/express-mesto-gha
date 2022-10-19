@@ -2,6 +2,8 @@ const User = require('../models/user');
 
 const { default: mongoose } = require('mongoose');
 
+const NotFoundError = require('../errors/NotFoundError');
+
 module.exports.getAllUsers = (req, res) => {
   User.find({})
     .then(users => res.send({ data: users }))
@@ -65,6 +67,7 @@ module.exports.editUserAvatar = (req, res) => {
 
 module.exports.getUser = (req, res) => {
   User.findById(req.params.userId)
+    .orFail(new NotFoundError("Not Found"))
     .then(user => res.send({ data: user }))
     .catch((err) => {
       if (err.name === 'NotFoundError') {
