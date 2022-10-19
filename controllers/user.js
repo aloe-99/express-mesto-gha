@@ -66,17 +66,23 @@ module.exports.editUserAvatar = (req, res) => {
 };
 
 module.exports.getUser = (req, res) => {
-  User.findById(req.params.userId)
-    .orFail(new NotFoundError("Not Found"))
-    .then(user => res.send({ data: user }))
-    .catch((err) => {
-      if (err.name === 'NotFoundError') {
-        return res.status(404).send({
-          "message": "Запрашиваемый пользователь не найден"
-        });
-      }
-      res.status(500);
-      console.log(`Произошла неизвестная ошибка ${err.name}: ${err.message}`);
-      return;
+  if (req.params.userId.match(/^[0-9a-fA-F]{24}$/)) {
+    User.findById(req.params.userId)
+      .orFail(new NotFoundError("Not Found"))
+      .then(user => res.send({ data: user }))
+      .catch((err) => {
+        if (err.name === 'NotFoundError') {
+          return res.status(404).send({
+            "message": "Запрашиваемый пользователь не найден"
+          });
+        }
+        res.status(500);
+        console.log(`Произошла неизвестная ошибка ${err.name}: ${err.message}`);
+        return;
+      });
+  } else {
+    return res.status(400).send({
+      "message": "Переданы некорректный идентификатор пользователя"
     });
+  }
 };
