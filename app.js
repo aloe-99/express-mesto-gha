@@ -26,6 +26,18 @@ app.use('/users', usersRouter);
 
 app.use('/cards', cardsRouter);
 
+app.get('*', function (req, res) {
+  res.status(404).send({
+    "message": "Страница не найдена"
+  });
+});
+
+app.patch('*', function (req, res) {
+  res.status(404).send({
+    "message": "Страница не найдена"
+  });
+});
+
 app.listen(PORT, () => {
   console.log(`App listening on ${PORT}`);
 });

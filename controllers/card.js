@@ -4,8 +4,6 @@ const { default: mongoose } = require('mongoose');
 
 const NotFoundError = require('../errors/NotFoundError');
 
-const ValidationError = require('../errors/ValidationError');
-
 module.exports.getCards = (req, res) => {
   Card.find({})
     .then(cards => res.send({ data: cards }))
