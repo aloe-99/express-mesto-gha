@@ -16,6 +16,11 @@ module.exports = {
   plugins: [
     'react',
   ],
+  settings: {
+    react: {
+      version: 'detect',
+    },
+  },
   rules: {
     'no-underscore-dangle': 'off',
     'no-param-reassign': 'off',
