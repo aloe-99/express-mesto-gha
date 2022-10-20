@@ -2,7 +2,9 @@ const cardsRouter = require('express').Router();
 
 const bodyParser = require('body-parser');
 
-const { getCards, createCard, likeCard, removeLike, deleteCard } = require('../controllers/card');
+const {
+  getCards, createCard, likeCard, removeLike, deleteCard,
+} = require('../controllers/card');
 
 cardsRouter.use(bodyParser.json());
 cardsRouter.use(bodyParser.urlencoded({ extended: true }));

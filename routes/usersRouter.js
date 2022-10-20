@@ -2,7 +2,9 @@ const usersRouter = require('express').Router();
 
 const bodyParser = require('body-parser');
 
-const { getAllUsers, createUser, editUser, editUserAvatar, getUser } = require('../controllers/user');
+const {
+  getAllUsers, createUser, editUser, editUserAvatar, getUser,
+} = require('../controllers/user');
 
 usersRouter.use(bodyParser.json());
 usersRouter.use(bodyParser.urlencoded({ extended: true }));

@@ -1,21 +1,21 @@
-const Card = require('../models/card');
-
+/* eslint-disable consistent-return */
 const { default: mongoose } = require('mongoose');
+const Card = require('../models/card');
 
 const NotFoundError = require('../errors/NotFoundError');
 
 module.exports.getCards = (req, res) => {
   Card.find({})
-    .then(cards => res.send({ data: cards }))
+    .then((cards) => res.send({ data: cards }))
     .catch((err) => {
       if (err.name === 'NotFoundError') {
         return res.status(404).send({
-          "message": "Запрашиваемый объект не найден"
+          message: 'Запрашиваемый объект не найден',
         });
       }
       res.status(500);
       console.log(`Произошла неизвестная ошибка ${err.name}: ${err.message}`);
-      return;
+      return '';
     });
 };
 
@@ -23,16 +23,16 @@ module.exports.createCard = (req, res) => {
   const { name, link } = req.body;
   const owner = mongoose.Types.ObjectId(req.user._id);
   Card.create({ name, link, owner })
-    .then(cards => res.send({ data: cards }))
+    .then((cards) => res.send({ data: cards }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         return res.status(400).send({
-          "message": "Переданы некорректные данные"
+          message: 'Переданы некорректные данные',
         });
       }
       res.status(500);
       console.log(`Произошла неизвестная ошибка ${err.name}: ${err.message}`);
-      return;
+      return '';
     });
 };
 
@@ -43,26 +43,25 @@ module.exports.likeCard = (req, res) => {
       { $addToSet: { likes: req.user._id } },
       { new: true },
     )
-      .orFail(new NotFoundError("Not Found"))
-      .then(card => res.send({ data: card }))
+      .orFail(new NotFoundError('Not Found'))
+      .then((card) => res.send({ data: card }))
       .catch((err) => {
         if (err.name === 'NotFoundError') {
           return res.status(404).send({
-            "message": "Запрашиваемый объект не найден"
+            message: 'Запрашиваемый объект не найден',
           });
         }
         if (err.name === 'ValidationError') {
           return res.status(400).send({
-            "message": "Некорректный идентификатор объекта"
+            message: 'Некорректный идентификатор объекта',
           });
         }
         res.status(500);
         console.log(`Произошла неизвестная ошибка ${err.name}: ${err.message}`);
-        return;
       });
   } else {
     return res.status(400).send({
-      "message": "Некорректный идентификатор объекта"
+      message: 'Некорректный идентификатор объекта',
     });
   }
 };
@@ -74,26 +73,25 @@ module.exports.removeLike = (req, res) => {
       { $pull: { likes: req.user._id } },
       { new: true },
     )
-      .orFail(new NotFoundError("Not Found"))
-      .then(card => res.send({ data: card }))
+      .orFail(new NotFoundError('Not Found'))
+      .then((card) => res.send({ data: card }))
       .catch((err) => {
         if (err.name === 'NotFoundError') {
           return res.status(404).send({
-            "message": "Запрашиваемый объект не найден"
+            message: 'Запрашиваемый объект не найден',
           });
         }
         if (err.name === 'ValidationError') {
           return res.status(400).send({
-            "message": "Некорректный идентификатор объекта"
+            message: 'Некорректный идентификатор объекта',
           });
         }
         res.status(500);
         console.log(`Произошла неизвестная ошибка ${err.name}: ${err.message}`);
-        return;
       });
   } else {
     return res.status(400).send({
-      "message": "Некорректный идентификатор объекта"
+      message: 'Некорректный идентификатор объекта',
     });
   }
 };
@@ -101,26 +99,25 @@ module.exports.removeLike = (req, res) => {
 module.exports.deleteCard = (req, res) => {
   if (req.params.cardId.match(/^[0-9a-fA-F]{24}$/)) {
     Card.findByIdAndRemove(req.params.cardId)
-      .orFail(new NotFoundError("Not Found"))
-      .then(cards => res.send({ data: cards }))
+      .orFail(new NotFoundError('Not Found'))
+      .then((cards) => res.send({ data: cards }))
       .catch((err) => {
         if (err.name === 'NotFoundError') {
           return res.status(404).send({
-            "message": "Запрашиваемый объект не найден"
+            message: 'Запрашиваемый объект не найден',
           });
         }
         if (err.name === 'ValidationError') {
           return res.status(400).send({
-            "message": "Некорректный идентификатор объекта"
+            message: 'Некорректный идентификатор объекта',
           });
         }
         res.status(500);
         console.log(`Произошла неизвестная ошибка ${err.name}: ${err.message}`);
-        return;
       });
   } else {
     return res.status(400).send({
-      "message": "Некорректный идентификатор объекта"
+      message: 'Некорректный идентификатор объекта',
     });
   }
-}
+};

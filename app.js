@@ -16,7 +16,7 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
 
 app.use((req, res, next) => {
   req.user = {
-    _id: '6349a39861489784e93d29f7'
+    _id: '6349a39861489784e93d29f7',
   };
 
   next();
@@ -26,15 +26,15 @@ app.use('/users', usersRouter);
 
 app.use('/cards', cardsRouter);
 
-app.get('*', function (req, res) {
+app.get('*', (req, res) => {
   res.status(404).send({
-    "message": "Страница не найдена"
+    message: 'Страница не найдена',
   });
 });
 
-app.patch('*', function (req, res) {
+app.patch('*', (req, res) => {
   res.status(404).send({
-    "message": "Страница не найдена"
+    message: 'Страница не найдена',
   });
 });
 
