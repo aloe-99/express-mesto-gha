@@ -4,12 +4,11 @@
     "commonjs": "true",
     "es2021": "true"
   },
-  "extends": ["plugin:react/recommended", "airbnb-base"],
+  "extends": "airbnb-base",
   "overrides": [],
   "parserOptions": {
     "ecmaVersion": "latest"
   },
-  "plugins": ["react"],
   "settings": {
     "react": {
       "version": "detect"

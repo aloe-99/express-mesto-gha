@@ -4,18 +4,16 @@ const User = require('../models/user');
 
 const NotFoundError = require('../errors/NotFoundError');
 
+const NOT_FOUND = 404;
+
+const BAD_REQUEST = 400;
+
+const ITERNAL_SERVER_ERROR = 500;
+
 module.exports.getAllUsers = (req, res) => {
   User.find({})
     .then((users) => res.send({ data: users }))
-    .catch((err) => {
-      if (err.name === 'NotFoundError') {
-        return res.status(404).send({
-          message: 'Запрашиваемый пользователь не найден',
-        });
-      }
-      res.status(500);
-      console.log(`Произошла неизвестная ошибка ${err.name}: ${err.message}`);
-    });
+    .catch((err) => res.status(ITERNAL_SERVER_ERROR).send({ message: `Произошла неизвестная ошибка ${err.name}: ${err.message}` }));
 };
 
 module.exports.createUser = (req, res) => {
@@ -24,12 +22,11 @@ module.exports.createUser = (req, res) => {
     .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(400).send({
+        return res.status(BAD_REQUEST).send({
           message: 'Переданы некорректные данные',
         });
       }
-      res.status(500);
-      console.log(`Произошла неизвестная ошибка ${err.name}: ${err.message}`);
+      return res.status(ITERNAL_SERVER_ERROR).send({ message: `Произошла неизвестная ошибка ${err.name}: ${err.message}` });
     });
 };
 
@@ -38,17 +35,11 @@ module.exports.editUser = (req, res) => {
     .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(400).send({
+        return res.status(BAD_REQUEST).send({
           message: 'Переданы некорректные данные',
         });
       }
-      if (err.name === 'AssertionError') {
-        return res.status(404).send({
-          message: 'Страница не найдена',
-        });
-      }
-      res.status(500);
-      console.log(`Произошла неизвестная ошибка ${err.name}: ${err.message}`);
+      return res.status(ITERNAL_SERVER_ERROR).send({ message: `Произошла неизвестная ошибка ${err.name}: ${err.message}` });
     });
 };
 
@@ -57,17 +48,11 @@ module.exports.editUserAvatar = (req, res) => {
     .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(400).send({
+        return res.status(BAD_REQUEST).send({
           message: 'Переданы некорректные данные',
         });
       }
-      if (err.name === 'AssertionError') {
-        return res.status(404).send({
-          message: 'Страница не найдена',
-        });
-      }
-      res.status(500);
-      console.log(`Произошла неизвестная ошибка ${err.name}: ${err.message}`);
+      return res.status(ITERNAL_SERVER_ERROR).send({ message: `Произошла неизвестная ошибка ${err.name}: ${err.message}` });
     });
 };
 
@@ -78,15 +63,14 @@ module.exports.getUser = (req, res) => {
       .then((user) => res.send({ data: user }))
       .catch((err) => {
         if (err.name === 'NotFoundError') {
-          return res.status(404).send({
+          return res.status(NOT_FOUND).send({
             message: 'Запрашиваемый пользователь не найден',
           });
         }
-        res.status(500);
-        console.log(`Произошла неизвестная ошибка ${err.name}: ${err.message}`);
+        return res.status(ITERNAL_SERVER_ERROR).send({ message: `Произошла неизвестная ошибка ${err.name}: ${err.message}` });
       });
   } else {
-    return res.status(400).send({
+    return res.status(BAD_REQUEST).send({
       message: 'Переданы некорректный идентификатор пользователя',
     });
   }
