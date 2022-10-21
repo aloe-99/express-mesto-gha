@@ -13,7 +13,7 @@ const ITERNAL_SERVER_ERROR = 500;
 module.exports.getCards = (req, res) => {
   Card.find({})
     .then((cards) => res.send({ data: cards }))
-    .catch((err) => res.status(ITERNAL_SERVER_ERROR).send({ message: `Произошла неизвестная ошибка ${err.name}: ${err.message}` }));
+    .catch(() => res.status(ITERNAL_SERVER_ERROR).send({ message: 'Произошла неизвестная ошибка сервера' }));
 };
 
 module.exports.createCard = (req, res) => {
@@ -27,7 +27,7 @@ module.exports.createCard = (req, res) => {
           message: 'Переданы некорректные данные',
         });
       }
-      return res.status(ITERNAL_SERVER_ERROR).send({ message: `Произошла неизвестная ошибка ${err.name}: ${err.message}` });
+      return res.status(ITERNAL_SERVER_ERROR).send({ message: 'Произошла неизвестная ошибка сервера' });
     });
 };
 
@@ -46,7 +46,7 @@ module.exports.likeCard = (req, res) => {
             message: 'Запрашиваемый объект не найден',
           });
         }
-        return res.status(ITERNAL_SERVER_ERROR).send({ message: `Произошла неизвестная ошибка ${err.name}: ${err.message}` });
+        return res.status(ITERNAL_SERVER_ERROR).send({ message: 'Произошла неизвестная ошибка сервера' });
       });
   } else {
     return res.status(BAD_REQUEST).send({
@@ -70,7 +70,7 @@ module.exports.removeLike = (req, res) => {
             message: 'Запрашиваемый объект не найден',
           });
         }
-        return res.status(ITERNAL_SERVER_ERROR).send({ message: `Произошла неизвестная ошибка ${err.name}: ${err.message}` });
+        return res.status(ITERNAL_SERVER_ERROR).send({ message: 'Произошла неизвестная ошибка сервера' });
       });
   } else {
     return res.status(BAD_REQUEST).send({
@@ -90,7 +90,7 @@ module.exports.deleteCard = (req, res) => {
             message: 'Запрашиваемый объект не найден',
           });
         }
-        return res.status(ITERNAL_SERVER_ERROR).send({ message: `Произошла неизвестная ошибка ${err.name}: ${err.message}` });
+        return res.status(ITERNAL_SERVER_ERROR).send({ message: 'Произошла неизвестная ошибка сервера' });
       });
   } else {
     return res.status(BAD_REQUEST).send({

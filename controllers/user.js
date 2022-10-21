@@ -13,7 +13,7 @@ const ITERNAL_SERVER_ERROR = 500;
 module.exports.getAllUsers = (req, res) => {
   User.find({})
     .then((users) => res.send({ data: users }))
-    .catch((err) => res.status(ITERNAL_SERVER_ERROR).send({ message: `Произошла неизвестная ошибка ${err.name}: ${err.message}` }));
+    .catch(() => res.status(ITERNAL_SERVER_ERROR).send({ message: 'Произошла неизвестная ошибка сервера' }));
 };
 
 module.exports.createUser = (req, res) => {
@@ -26,7 +26,7 @@ module.exports.createUser = (req, res) => {
           message: 'Переданы некорректные данные',
         });
       }
-      return res.status(ITERNAL_SERVER_ERROR).send({ message: `Произошла неизвестная ошибка ${err.name}: ${err.message}` });
+      return res.status(ITERNAL_SERVER_ERROR).send({ message: 'Произошла неизвестная ошибка сервера' });
     });
 };
 
@@ -39,7 +39,7 @@ module.exports.editUser = (req, res) => {
           message: 'Переданы некорректные данные',
         });
       }
-      return res.status(ITERNAL_SERVER_ERROR).send({ message: `Произошла неизвестная ошибка ${err.name}: ${err.message}` });
+      return res.status(ITERNAL_SERVER_ERROR).send({ message: 'Произошла неизвестная ошибка сервера' });
     });
 };
 
@@ -52,7 +52,7 @@ module.exports.editUserAvatar = (req, res) => {
           message: 'Переданы некорректные данные',
         });
       }
-      return res.status(ITERNAL_SERVER_ERROR).send({ message: `Произошла неизвестная ошибка ${err.name}: ${err.message}` });
+      return res.status(ITERNAL_SERVER_ERROR).send({ message: 'Произошла неизвестная ошибка сервера' });
     });
 };
 
@@ -67,7 +67,7 @@ module.exports.getUser = (req, res) => {
             message: 'Запрашиваемый пользователь не найден',
           });
         }
-        return res.status(ITERNAL_SERVER_ERROR).send({ message: `Произошла неизвестная ошибка ${err.name}: ${err.message}` });
+        return res.status(ITERNAL_SERVER_ERROR).send({ message: 'Произошла неизвестная ошибка сервера' });
       });
   } else {
     return res.status(BAD_REQUEST).send({
