@@ -9,14 +9,13 @@ const NotFoundError = require('../errors/NotFoundError');
 
 const BadRequestError = require('../errors/BadRequestError');
 
+const ForbiddenError = require('../errors/ForbiddenError');
+
 const IternalServerError = require('../errors/IternalServerError');
 
 module.exports.getCards = (req, res, next) => {
   Card.find({})
     .then((cards) => res.send({ data: cards }))
-    .catch((err) => {
-      throw new IternalServerError('Неизвестная ошибка сервера');
-    })
     .catch(next);
 };
 
@@ -27,11 +26,10 @@ module.exports.createCard = (req, res, next) => {
     .then((cards) => res.send({ data: cards }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        throw new BadRequestError('Переданы некорректные данные');
+        next(new BadRequestError('Переданы некорректные данные'));
       }
-      throw new IternalServerError('Неизвестная ошибка сервера');
-    })
-    .catch(next);
+      next(new IternalServerError('Неизвестная ошибка сервера'));
+    });
 };
 
 module.exports.likeCard = (req, res, next) => {
@@ -45,13 +43,13 @@ module.exports.likeCard = (req, res, next) => {
       .then((card) => res.send({ data: card }))
       .catch((err) => {
         if (err.name === 'NotFoundError') {
-          throw new NotFoundError('Запрашиваемый объект не неайден');
+          next(new NotFoundError('Запрашиваемый объект не найден'));
         }
-        throw new IternalServerError('Неизвестная ошибка сервера');
+        next(new IternalServerError('Неизвестная ошибка сервера'));
       })
       .catch(next);
   } else {
-    throw new BadRequestError('Переданы некорректные данные');
+    next(new BadRequestError('Переданы некорректные данные'));
   }
 };
 
@@ -66,29 +64,44 @@ module.exports.removeLike = (req, res, next) => {
       .then((card) => res.send({ data: card }))
       .catch((err) => {
         if (err.name === 'NotFoundError') {
-          throw new NotFoundError('Запрашиваемый объект не неайден');
+          next(new NotFoundError('Запрашиваемый объект не найден'));
         }
-        throw new IternalServerError('Неизвестная ошибка сервера');
+        next(new IternalServerError('Неизвестная ошибка сервера'));
       })
       .catch(next);
   } else {
-    throw new BadRequestError('Переданы некорректные данные');
+    next(new BadRequestError('Переданы некорректные данные'));
   }
 };
 
 module.exports.deleteCard = (req, res, next) => {
-  if (req.params.cardId.match(/^[0-9a-fA-F]{24}$/)) {
-    Card.findByIdAndRemove(req.params.cardId)
+  const { cardId } = req.params;
+  const owner = req.user._id;
+  if (cardId.match(/^[0-9a-fA-F]{24}$/)) {
+    Card.findById(cardId)
+      .then((card) => {
+        if (card.owner === owner) {
+          Card.findByIdAndRemove(cardId)
+            .orFail(new NotFoundError('Not Found'))
+            .then((cards) => res.send({ data: cards }))
+            .catch((err) => {
+              if (err.name === 'NotFoundError') {
+                next(new NotFoundError('Запрашиваемый объект не найден'));
+              }
+              next(new IternalServerError('Неизвестная ошибка сервера'));
+            });
+        } else {
+          next(new ForbiddenError('Доступ к запрашиваемому ресурсу заблокирован'));
+        }
+      })
       .orFail(new NotFoundError('Not Found'))
-      .then((cards) => res.send({ data: cards }))
       .catch((err) => {
         if (err.name === 'NotFoundError') {
-          throw new NotFoundError('Запрашиваемый объект не неайден');
+          next(new NotFoundError('Запрашиваемый объект не найден'));
         }
-        throw new IternalServerError('Неизвестная ошибка сервера');
-      })
-      .catch(next);
+        next(new IternalServerError('Неизвестная ошибка сервера'));
+      });
   } else {
-    throw new BadRequestError('Переданы некорректные данные');
+    next(new BadRequestError('Переданы некорректные данные'));
   }
 };

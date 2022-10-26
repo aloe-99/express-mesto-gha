@@ -7,8 +7,6 @@ const bcrypt = require('bcrypt');
 
 const jwt = require('jsonwebtoken');
 
-const isEmail = require('validator/lib/isEmail');
-
 const User = require('../models/user');
 
 const NotFoundError = require('../errors/NotFoundError');
@@ -17,14 +15,13 @@ const BadRequestError = require('../errors/BadRequestError');
 
 const AuthorizationError = require('../errors/AuthorizationError');
 
+const DuplicateError = require('../errors/DuplicateError');
+
 const IternalServerError = require('../errors/IternalServerError');
 
 module.exports.getAllUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.send({ data: users }))
-    .catch((err) => {
-      throw new IternalServerError('Неизвестная ошибка сервера');
-    })
     .catch(next);
 };
 
@@ -34,49 +31,44 @@ module.exports.createUser = (req, res, next) => {
   } = req.body;
   bcrypt.hash(password, 10)
     .then((hash) => {
-      if (!isEmail(email)) {
-        throw new BadRequestError('Переданы некорректные данные');
-      }
       User.create({
         name,
         about,
         avatar,
         email,
         password: hash,
-      });
-    })
-    .then((user) => res.send({ data: user }))
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        throw new BadRequestError('Переданы некорректные данные');
-      }
-      throw new IternalServerError('Неизвестная ошибка сервера');
-    })
-    .catch(next);
+      })
+        .then((user) => {
+          res.send({ data: user });
+        })
+        .catch((err) => {
+          next(err);
+        });
+    });
 };
 
 module.exports.editUser = (req, res, next) => {
   User.findByIdAndUpdate(req.user._id, { name: req.body.name, about: req.body.about }, { new: true, runValidators: true, upsert: false })
     .then((user) => res.send({ data: user }))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        throw new BadRequestError('Переданы некорректные данные');
+      if (err.code === 400) {
+        next(new BadRequestError('Переданы некорректные данные'));
+      } else {
+        next(err);
       }
-      throw new IternalServerError('Неизвестная ошибка сервера');
-    })
-    .catch(next);
+    });
 };
 
 module.exports.editUserAvatar = (req, res, next) => {
   User.findByIdAndUpdate(req.user._id, { avatar: req.body.avatar }, { new: true, runValidators: true, upsert: false })
     .then((user) => res.send({ data: user }))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        throw new BadRequestError('Переданы некорректные данные');
+      if (err.code === 400) {
+        next(new BadRequestError('Переданы некорректные данные'));
+      } else {
+        next(err);
       }
-      throw new IternalServerError('Неизвестная ошибка сервера');
-    })
-    .catch(next);
+    });
 };
 
 module.exports.getUser = (req, res, next) => {
@@ -85,14 +77,10 @@ module.exports.getUser = (req, res, next) => {
       .orFail(new NotFoundError('Not Found'))
       .then((user) => res.send({ data: user }))
       .catch((err) => {
-        if (err.name === 'NotFoundError') {
-          throw new NotFoundError('Запрашиваемый пользователь не неайден');
-        }
-        throw new IternalServerError('Неизвестная ошибка сервера');
-      })
-      .catch(next);
+        next(err);
+      });
   } else {
-    throw new BadRequestError('Переданы некорректные данные');
+    next(new BadRequestError('Переданы некорректные данные'));
   }
 };
 
@@ -114,7 +102,6 @@ module.exports.login = (req, res, next) => {
       res.send({ token });
     })
     .catch((err) => {
-      throw new AuthorizationError(err.message);
-    })
-    .catch(next);
+      next(new AuthorizationError(err.message));
+    });
 };
