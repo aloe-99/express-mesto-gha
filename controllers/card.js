@@ -1,37 +1,40 @@
+/* eslint-disable no-undef */
+/* eslint-disable no-unused-vars */
 /* eslint-disable consistent-return */
 const { default: mongoose } = require('mongoose');
+
 const Card = require('../models/card');
 
 const NotFoundError = require('../errors/NotFoundError');
 
-const NOT_FOUND = 404;
+const BadRequestError = require('../errors/BadRequestError');
 
-const BAD_REQUEST = 400;
+const IternalServerError = require('../errors/IternalServerError');
 
-const ITERNAL_SERVER_ERROR = 500;
-
-module.exports.getCards = (req, res) => {
+module.exports.getCards = (req, res, next) => {
   Card.find({})
     .then((cards) => res.send({ data: cards }))
-    .catch(() => res.status(ITERNAL_SERVER_ERROR).send({ message: 'Произошла неизвестная ошибка сервера' }));
+    .catch((err) => {
+      throw new IternalServerError('Неизвестная ошибка сервера');
+    })
+    .catch(next);
 };
 
-module.exports.createCard = (req, res) => {
+module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
   const owner = mongoose.Types.ObjectId(req.user._id);
   Card.create({ name, link, owner })
     .then((cards) => res.send({ data: cards }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(BAD_REQUEST).send({
-          message: 'Переданы некорректные данные',
-        });
+        throw new BadRequestError('Переданы некорректные данные');
       }
-      return res.status(ITERNAL_SERVER_ERROR).send({ message: 'Произошла неизвестная ошибка сервера' });
-    });
+      throw new IternalServerError('Неизвестная ошибка сервера');
+    })
+    .catch(next);
 };
 
-module.exports.likeCard = (req, res) => {
+module.exports.likeCard = (req, res, next) => {
   if (req.params.cardId.match(/^[0-9a-fA-F]{24}$/)) {
     Card.findByIdAndUpdate(
       req.params.cardId,
@@ -42,20 +45,17 @@ module.exports.likeCard = (req, res) => {
       .then((card) => res.send({ data: card }))
       .catch((err) => {
         if (err.name === 'NotFoundError') {
-          return res.status(NOT_FOUND).send({
-            message: 'Запрашиваемый объект не найден',
-          });
+          throw new NotFoundError('Запрашиваемый объект не неайден');
         }
-        return res.status(ITERNAL_SERVER_ERROR).send({ message: 'Произошла неизвестная ошибка сервера' });
-      });
+        throw new IternalServerError('Неизвестная ошибка сервера');
+      })
+      .catch(next);
   } else {
-    return res.status(BAD_REQUEST).send({
-      message: 'Некорректный идентификатор объекта',
-    });
+    throw new BadRequestError('Переданы некорректные данные');
   }
 };
 
-module.exports.removeLike = (req, res) => {
+module.exports.removeLike = (req, res, next) => {
   if (req.params.cardId.match(/^[0-9a-fA-F]{24}$/)) {
     Card.findByIdAndUpdate(
       req.params.cardId,
@@ -66,35 +66,29 @@ module.exports.removeLike = (req, res) => {
       .then((card) => res.send({ data: card }))
       .catch((err) => {
         if (err.name === 'NotFoundError') {
-          return res.status(NOT_FOUND).send({
-            message: 'Запрашиваемый объект не найден',
-          });
+          throw new NotFoundError('Запрашиваемый объект не неайден');
         }
-        return res.status(ITERNAL_SERVER_ERROR).send({ message: 'Произошла неизвестная ошибка сервера' });
-      });
+        throw new IternalServerError('Неизвестная ошибка сервера');
+      })
+      .catch(next);
   } else {
-    return res.status(BAD_REQUEST).send({
-      message: 'Некорректный идентификатор объекта',
-    });
+    throw new BadRequestError('Переданы некорректные данные');
   }
 };
 
-module.exports.deleteCard = (req, res) => {
+module.exports.deleteCard = (req, res, next) => {
   if (req.params.cardId.match(/^[0-9a-fA-F]{24}$/)) {
     Card.findByIdAndRemove(req.params.cardId)
       .orFail(new NotFoundError('Not Found'))
       .then((cards) => res.send({ data: cards }))
       .catch((err) => {
         if (err.name === 'NotFoundError') {
-          return res.status(NOT_FOUND).send({
-            message: 'Запрашиваемый объект не найден',
-          });
+          throw new NotFoundError('Запрашиваемый объект не неайден');
         }
-        return res.status(ITERNAL_SERVER_ERROR).send({ message: 'Произошла неизвестная ошибка сервера' });
-      });
+        throw new IternalServerError('Неизвестная ошибка сервера');
+      })
+      .catch(next);
   } else {
-    return res.status(BAD_REQUEST).send({
-      message: 'Некорректный идентификатор объекта',
-    });
+    throw new BadRequestError('Переданы некорректные данные');
   }
 };
