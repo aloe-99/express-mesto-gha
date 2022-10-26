@@ -1,3 +1,4 @@
+/* eslint-disable no-useless-escape */
 /* eslint-disable func-names */
 /* eslint-disable import/no-unresolved */
 const mongoose = require('mongoose');
@@ -20,7 +21,7 @@ const userSchema = new mongoose.Schema({
   avatar: {
     validate: {
       validator(v) {
-        return /http[s]?:\/\/[www.]?[a-zA-z0-9.]+[#]?/.test(v);
+        return /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w\.-]*)*\/?$/.test(v);
       },
       message: (props) => `${props.value} is not a valid link!`,
     },
