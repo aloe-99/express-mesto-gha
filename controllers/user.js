@@ -39,8 +39,7 @@ module.exports.createUser = (req, res, next) => {
         password: hash,
       })
         .then((user) => {
-          const { name, about, avatar, email, _id } = user;
-          res.send({ data: { name, about, avatar, email, _id } });
+          res.send({ data: user });
         })
         .catch((err) => {
           next(err);
