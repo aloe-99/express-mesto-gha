@@ -1,7 +1,8 @@
+/* eslint-disable max-len */
 const IternalServerError = 500;
 
 module.exports = (err, req, res, next) => {
-  if (err.statusCode === (401 || 404 || 409 || 403)) {
+  if ((err.statusCode === 401) || (err.statusCode === 404) || (err.statusCode === 409) || (err.statusCode === 403)) {
     res.status(err.statusCode).send({ message: err.message });
     console.log(err);
   } else {

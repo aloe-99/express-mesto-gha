@@ -39,15 +39,14 @@ module.exports.likeCard = (req, res, next) => {
       { $addToSet: { likes: req.user._id } },
       { new: true },
     )
-      .orFail(new NotFoundError('Not Found'))
+      .orFail(new NotFoundError('Запрашиваемый объект не найден'))
       .then((card) => res.send({ data: card }))
       .catch((err) => {
         if (err.name === 'NotFoundError') {
           next(new NotFoundError('Запрашиваемый объект не найден'));
         }
-        next(new IternalServerError('Неизвестная ошибка сервера'));
-      })
-      .catch(next);
+        next(err);
+      });
   } else {
     next(new BadRequestError('Переданы некорректные данные'));
   }
@@ -60,7 +59,7 @@ module.exports.removeLike = (req, res, next) => {
       { $pull: { likes: req.user._id } },
       { new: true },
     )
-      .orFail(new NotFoundError('Not Found'))
+      .orFail(new NotFoundError('Запрашиваемый объект не найден'))
       .then((card) => res.send({ data: card }))
       .catch((err) => {
         if (err.name === 'NotFoundError') {
@@ -76,25 +75,20 @@ module.exports.removeLike = (req, res, next) => {
 
 module.exports.deleteCard = (req, res, next) => {
   const { cardId } = req.params;
-  const owner = req.user._id;
+  const user = req.user._id;
   if (cardId.match(/^[0-9a-fA-F]{24}$/)) {
     Card.findById(cardId)
+      .orFail(new NotFoundError('Запрашиваемый объект не найден'))
       .then((card) => {
-        if (card.owner === owner) {
+        const owner = card.owner.toString();
+        if (owner === user) {
           Card.findByIdAndRemove(cardId)
-            .orFail(new NotFoundError('Not Found'))
             .then((cards) => res.send({ data: cards }))
-            .catch((err) => {
-              if (err.name === 'NotFoundError') {
-                next(new NotFoundError('Запрашиваемый объект не найден'));
-              }
-              next(new IternalServerError('Неизвестная ошибка сервера'));
-            });
+            .catch(next);
         } else {
           next(new ForbiddenError('Доступ к запрашиваемому ресурсу заблокирован'));
         }
       })
-      .orFail(new NotFoundError('Not Found'))
       .catch((err) => {
         if (err.name === 'NotFoundError') {
           next(new NotFoundError('Запрашиваемый объект не найден'));

@@ -42,6 +42,9 @@ module.exports.createUser = (req, res, next) => {
           res.send({ data: user });
         })
         .catch((err) => {
+          if (err.code === 11000) {
+            next(new DuplicateError('Пользователь с данным email уже зарегистрирован'));
+          }
           next(err);
         });
     });
@@ -60,22 +63,24 @@ module.exports.editUser = (req, res, next) => {
 };
 
 module.exports.editUserAvatar = (req, res, next) => {
+  console.log('HELLO');
+  console.log(req.user._id);
   User.findByIdAndUpdate(req.user._id, { avatar: req.body.avatar }, { new: true, runValidators: true, upsert: false })
     .then((user) => res.send({ data: user }))
     .catch((err) => {
-      if (err.code === 400) {
-        next(new BadRequestError('Переданы некорректные данные'));
-      } else {
-        next(err);
-      }
+      next(err);
     });
 };
 
 module.exports.getUser = (req, res, next) => {
   if (req.params.userId.match(/^[0-9a-fA-F]{24}$/)) {
     User.findById(req.params.userId)
-      .orFail(new NotFoundError('Not Found'))
-      .then((user) => res.send({ data: user }))
+      .then((user) => {
+        if (!user) {
+          throw new NotFoundError('Пользователь не найден');
+        }
+        res.send({ data: user });
+      })
       .catch((err) => {
         next(err);
       });
