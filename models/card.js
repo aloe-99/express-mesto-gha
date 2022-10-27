@@ -1,3 +1,4 @@
+/* eslint-disable no-useless-escape */
 const mongoose = require('mongoose');
 
 const cardSchema = new mongoose.Schema({
@@ -8,6 +9,12 @@ const cardSchema = new mongoose.Schema({
     maxlength: 30,
   },
   link: {
+    validate: {
+      validator(v) {
+        return /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w\.-]*)*\/?$/.test(v);
+      },
+      message: (props) => `${props.value} is not a valid link!`,
+    },
     type: String,
     required: true,
   },

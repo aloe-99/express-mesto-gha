@@ -2,11 +2,11 @@
 const IternalServerError = 500;
 
 module.exports = (err, req, res, next) => {
-  if ((err.statusCode === 401) || (err.statusCode === 404) || (err.statusCode === 409) || (err.statusCode === 403)) {
+  if (err.statusCode) {
     res.status(err.statusCode).send({ message: err.message });
     console.log(err);
   } else {
-    res.status(IternalServerError).send({ message: err.message });
+    res.status(IternalServerError).send({ message: 'Неизвестная ошибка сервера' });
     console.log(err);
   }
   next();

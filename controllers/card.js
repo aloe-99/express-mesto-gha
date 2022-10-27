@@ -11,8 +11,6 @@ const BadRequestError = require('../errors/BadRequestError');
 
 const ForbiddenError = require('../errors/ForbiddenError');
 
-const IternalServerError = require('../errors/IternalServerError');
-
 module.exports.getCards = (req, res, next) => {
   Card.find({})
     .then((cards) => res.send({ data: cards }))
@@ -21,81 +19,70 @@ module.exports.getCards = (req, res, next) => {
 
 module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
-  const owner = mongoose.Types.ObjectId(req.user._id);
+  const owner = req.user._id;
   Card.create({ name, link, owner })
     .then((cards) => res.send({ data: cards }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         next(new BadRequestError('Переданы некорректные данные'));
+      } else {
+        next(err);
       }
-      next(new IternalServerError('Неизвестная ошибка сервера'));
     });
 };
 
 module.exports.likeCard = (req, res, next) => {
-  if (req.params.cardId.match(/^[0-9a-fA-F]{24}$/)) {
-    Card.findByIdAndUpdate(
-      req.params.cardId,
-      { $addToSet: { likes: req.user._id } },
-      { new: true },
-    )
-      .orFail(new NotFoundError('Запрашиваемый объект не найден'))
-      .then((card) => res.send({ data: card }))
-      .catch((err) => {
-        if (err.name === 'NotFoundError') {
-          next(new NotFoundError('Запрашиваемый объект не найден'));
-        }
+  Card.findByIdAndUpdate(
+    req.params.cardId,
+    { $addToSet: { likes: req.user._id } },
+    { new: true },
+  )
+    .orFail(new NotFoundError('Запрашиваемый объект не найден'))
+    .then((card) => res.send({ data: card }))
+    .catch((err) => {
+      if (err.name === 'NotFoundError') {
+        next(new NotFoundError('Запрашиваемый объект не найден'));
+      } else if (err.name === 'ValidationError') {
+        next(new BadRequestError('Переданы некорректные данные'));
+      } else {
         next(err);
-      });
-  } else {
-    next(new BadRequestError('Переданы некорректные данные'));
-  }
+      }
+    });
 };
 
 module.exports.removeLike = (req, res, next) => {
-  if (req.params.cardId.match(/^[0-9a-fA-F]{24}$/)) {
-    Card.findByIdAndUpdate(
-      req.params.cardId,
-      { $pull: { likes: req.user._id } },
-      { new: true },
-    )
-      .orFail(new NotFoundError('Запрашиваемый объект не найден'))
-      .then((card) => res.send({ data: card }))
-      .catch((err) => {
-        if (err.name === 'NotFoundError') {
-          next(new NotFoundError('Запрашиваемый объект не найден'));
-        }
-        next(new IternalServerError('Неизвестная ошибка сервера'));
-      })
-      .catch(next);
-  } else {
-    next(new BadRequestError('Переданы некорректные данные'));
-  }
+  Card.findByIdAndUpdate(
+    req.params.cardId,
+    { $pull: { likes: req.user._id } },
+    { new: true },
+  )
+    .orFail(new NotFoundError('Запрашиваемый объект не найден'))
+    .then((card) => res.send({ data: card }))
+    .catch((err) => {
+      if (err.name === 'NotFoundError') {
+        next(new NotFoundError('Запрашиваемый объект не найден'));
+      } else if (err.name === 'ValidationError') {
+        next(new BadRequestError('Переданы некорректные данные'));
+      } else {
+        next(err);
+      }
+    });
 };
 
 module.exports.deleteCard = (req, res, next) => {
   const { cardId } = req.params;
   const user = req.user._id;
-  if (cardId.match(/^[0-9a-fA-F]{24}$/)) {
-    Card.findById(cardId)
-      .orFail(new NotFoundError('Запрашиваемый объект не найден'))
-      .then((card) => {
-        const owner = card.owner.toString();
-        if (owner === user) {
-          Card.findByIdAndRemove(cardId)
-            .then((cards) => res.send({ data: cards }))
-            .catch(next);
-        } else {
-          next(new ForbiddenError('Доступ к запрашиваемому ресурсу заблокирован'));
-        }
-      })
-      .catch((err) => {
-        if (err.name === 'NotFoundError') {
-          next(new NotFoundError('Запрашиваемый объект не найден'));
-        }
-        next(new IternalServerError('Неизвестная ошибка сервера'));
-      });
-  } else {
-    next(new BadRequestError('Переданы некорректные данные'));
-  }
+  Card.findById(cardId)
+    .orFail(new NotFoundError('Запрашиваемый объект не найден'))
+    .then((card) => {
+      const owner = card.owner.toString();
+      if (owner === user) {
+        Card.findByIdAndRemove(cardId)
+          .then((cards) => res.send({ data: cards }))
+          .catch(next);
+      } else {
+        next(new ForbiddenError('Доступ к запрашиваемому ресурсу заблокирован'));
+      }
+    })
+    .catch(next);
 };

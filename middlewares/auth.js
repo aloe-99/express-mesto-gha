@@ -1,23 +1,19 @@
 /* eslint-disable consistent-return */
 const jwt = require('jsonwebtoken');
 
-const UNAUTHORIZED = 401;
+const AuthorizationError = require('../errors/AuthorizationError');
 
 module.exports = (req, res, next) => {
   const { token } = req.cookies;
   if (!token) {
-    return res
-      .status(UNAUTHORIZED)
-      .send({ message: 'Необходима авторизация' });
+    next(AuthorizationError);
   }
 
   let payload;
   try {
     payload = jwt.verify(token, 'some-secret-key');
   } catch (err) {
-    return res
-      .status(UNAUTHORIZED)
-      .send({ message: 'Необходима авторизация' });
+    next(AuthorizationError);
   }
   req.user = payload;
 
