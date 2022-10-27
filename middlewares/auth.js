@@ -6,14 +6,14 @@ const AuthorizationError = require('../errors/AuthorizationError');
 module.exports = (req, res, next) => {
   const { token } = req.cookies;
   if (!token) {
-    next(AuthorizationError);
+    next(new AuthorizationError('Ошибка авторизации'));
   }
 
   let payload;
   try {
     payload = jwt.verify(token, 'some-secret-key');
   } catch (err) {
-    next(AuthorizationError);
+    next(new AuthorizationError('Ошибка авторизации'));
   }
   req.user = payload;
 
