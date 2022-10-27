@@ -20,7 +20,13 @@ const DuplicateError = require('../errors/DuplicateError');
 module.exports.getAllUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.send({ data: users }))
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'Unauthorized') {
+        next(new AuthorizationError(err.message));
+      } else {
+        next(err);
+      }
+    });
 };
 
 module.exports.createUser = (req, res, next) => {
